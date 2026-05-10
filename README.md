@@ -74,13 +74,7 @@ pnpm run pack:dry-run
 
 ## Publishing
 
-Initial npm publishing can be done with:
-
-```sh
-npm publish --access public
-```
-
-Publishing from GitHub Releases is handled by GitHub Actions after npm Trusted Publishing is configured for this repository.
+Publishing is handled by GitHub Actions after npm Trusted Publishing is configured for this repository.
 
 ## Getting Help
 
