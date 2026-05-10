@@ -4,6 +4,7 @@ import type { Command } from "commander";
 import { validateApiKey } from "../../lib/client.js";
 import { writeApiKey } from "../../lib/config.js";
 import { run, type Writer } from "../../lib/command.js";
+import { formatSuccess } from "../../lib/ui.js";
 
 export function registerAuthApiCommand(
     auth: Command,
@@ -21,6 +22,6 @@ export function registerAuthApiCommand(
 
             await validateApiKey(apiKey);
             await writeApiKey(apiKey);
-            stdout("API key saved.");
+            stdout(formatSuccess("API key saved", "YouViCo CLI is ready to use."));
         }));
 }

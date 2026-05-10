@@ -1,7 +1,8 @@
-import { confirm } from "@inquirer/prompts";
 import type { Command } from "commander";
 
-import { output, run, type CommandContext } from "../../lib/command.js";
+import { run, type CommandContext } from "../../lib/command.js";
+import { confirmDestructive } from "../../lib/prompts.js";
+import { formatCancelled, formatSuccess } from "../../lib/ui.js";
 
 export function registerDeleteFolderCommand(
     folder: Command,
@@ -17,19 +18,19 @@ export function registerDeleteFolderCommand(
             const skipConfirm = options.yes || options.approve;
 
             if (!skipConfirm) {
-                const confirmed = await confirm({
-                    message: `Delete folder ${options.id}?`,
-                    default: false
+                const confirmed = await confirmDestructive({
+                    action: "Delete folder",
+                    target: options.id
                 });
 
                 if (!confirmed) {
-                    context.stdout("Delete cancelled.");
+                    context.stdout(formatCancelled("Delete cancelled"));
                     return;
                 }
             }
 
             const youvico = await context.getClient();
             await youvico.folders.delete(options.id);
-            output(context.program, options, context.stdout, { ok: true });
+            context.stdout(formatSuccess("Folder deleted"));
         }));
 }

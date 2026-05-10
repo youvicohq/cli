@@ -2,6 +2,7 @@ import type { Command } from "commander";
 
 import { getAuthStatus } from "../../lib/config.js";
 import type { Writer } from "../../lib/command.js";
+import { formatSuccess, formatWarning } from "../../lib/ui.js";
 
 export function registerAuthStatusCommand(
     auth: Command,
@@ -13,10 +14,13 @@ export function registerAuthStatusCommand(
         .action(async () => {
             const status = await getAuthStatus();
             if (!status.configured) {
-                stdout("Auth is not configured.");
+                stdout(formatWarning("Authentication is not configured", [
+                    "Run: youvico auth api",
+                    "Or set: YOUVICO_API_KEY"
+                ]));
                 return;
             }
 
-            stdout(`Auth is configured via ${status.source === "env" ? "YOUVICO_API_KEY" : "saved config"}.`);
+            stdout(formatSuccess(`Authentication configured via ${status.source === "env" ? "YOUVICO_API_KEY" : "saved config"}`));
         });
 }

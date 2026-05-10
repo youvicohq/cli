@@ -2,6 +2,7 @@ import type { Command } from "commander";
 
 import { clearClientConfig } from "../../lib/config.js";
 import { run, type Writer } from "../../lib/command.js";
+import { formatSuccess } from "../../lib/ui.js";
 
 export function registerClearConfigCommand(
     config: Command,
@@ -20,6 +21,6 @@ export function registerClearConfigCommand(
             ].filter(Boolean) as Array<"baseUrl" | "timeoutMs">;
 
             await clearClientConfig(keys.length > 0 ? keys : ["baseUrl", "timeoutMs"]);
-            stdout("Config cleared.");
+            stdout(formatSuccess("Config cleared"));
         }));
 }

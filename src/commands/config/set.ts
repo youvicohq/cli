@@ -2,6 +2,7 @@ import { InvalidArgumentError, Option, type Command } from "commander";
 
 import { setClientConfig } from "../../lib/config.js";
 import { run, type Writer } from "../../lib/command.js";
+import { formatSuccess } from "../../lib/ui.js";
 
 export function registerSetConfigCommand(
     config: Command,
@@ -24,7 +25,7 @@ export function registerSetConfigCommand(
             }
 
             await setClientConfig(values);
-            stdout("Config saved.");
+            stdout(formatSuccess("Config saved"));
         }));
 }
 

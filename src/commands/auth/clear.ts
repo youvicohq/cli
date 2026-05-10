@@ -2,6 +2,7 @@ import type { Command } from "commander";
 
 import { clearApiKey } from "../../lib/config.js";
 import type { Writer } from "../../lib/command.js";
+import { formatSuccess } from "../../lib/ui.js";
 
 export function registerAuthClearCommand(
     auth: Command,
@@ -12,6 +13,6 @@ export function registerAuthClearCommand(
         .description("Remove the saved API key")
         .action(async () => {
             await clearApiKey();
-            stdout("Saved API key removed.");
+            stdout(formatSuccess("Saved API key removed"));
         });
 }
