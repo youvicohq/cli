@@ -3,6 +3,31 @@ import { describe, expect, test } from "vitest";
 import { createProgram } from "../src/cli.js";
 
 describe("contextual help", () => {
+    test("prints version with version command", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync(["node", "youvico", "version"]);
+
+        expect(output).toEqual(["1.0.0"]);
+    });
+
+    test("prints version with -v", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(program.parseAsync(["node", "youvico", "-v"])).rejects.toThrow("1.0.0");
+
+        expect(output).toEqual(["1.0.0"]);
+    });
+
     test("shows auth subcommand help for incomplete auth command", async () => {
         const output: string[] = [];
         const program = createProgram({

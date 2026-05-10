@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { Command, CommanderError } from "commander";
 
 import { registerAuthCommands } from "./commands/auth.js";
@@ -10,6 +11,10 @@ import { registerProjectCommands } from "./commands/project.js";
 import { registerReactionCommands } from "./commands/reaction.js";
 import { createClient } from "./lib/client.js";
 import { formatError } from "./lib/errors.js";
+
+const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+    version: string;
+};
 
 export function createProgram(deps: {
     stdout?: (message: string) => void;
@@ -27,11 +32,17 @@ export function createProgram(deps: {
     program
         .name("youvico")
         .description("YouViCo command-line interface")
+        .version(version.version, "-v, --version", "print CLI version")
         .showHelpAfterError()
         .configureOutput({
             writeOut: message => stdout(message.trimEnd()),
             writeErr: message => stderr(message.trimEnd())
         });
+
+    program
+        .command("version")
+        .description("Print CLI version")
+        .action(() => stdout(version.version));
 
     registerAuthCommands(program, stdout, stderr);
     registerConfigCommands(program, stdout, stderr);
