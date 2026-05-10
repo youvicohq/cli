@@ -42,7 +42,7 @@
   "homepage": "https://github.com/youvicohq/cli#readme",
   "dependencies": {
     "@inquirer/prompts": "^7.2.1",
-    "@youvico/api": "^0.1.0",
+    "@youvico/api": "^1.0.0",
     "commander": "^12.1.0"
   },
   "devDependencies": {
