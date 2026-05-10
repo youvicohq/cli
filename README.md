@@ -76,6 +76,16 @@ pnpm run pack:dry-run
 
 Publishing is handled by GitHub Actions after npm Trusted Publishing is configured for this repository.
 
+To cut a release, run one of:
+
+```sh
+pnpm bump patch
+pnpm bump minor
+pnpm bump major
+```
+
+The bump script requires a clean working tree. It updates `package.json` and `pnpm-lock.yaml`, runs release checks, commits and tags the new version, pushes the tag, then waits for the `Publish` GitHub Actions workflow to publish to npm and create the GitHub release.
+
 ## Getting Help
 
 Use the [GitHub issue tracker](https://github.com/youvicohq/cli/issues) for bug reports and feature requests.

@@ -41,6 +41,7 @@ describe("contextual help", () => {
 
         expect(output.join("\n")).toContain("Usage: youvico auth");
         expect(output.join("\n")).toContain("api");
+        expect(output.join("\n")).toContain("ping");
         expect(output.join("\n")).toContain("status");
     });
 

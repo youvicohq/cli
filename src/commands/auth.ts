@@ -2,6 +2,7 @@ import type { Command } from "commander";
 
 import { registerAuthApiCommand } from "./auth/api.js";
 import { registerAuthClearCommand } from "./auth/clear.js";
+import { registerAuthPingCommand } from "./auth/ping.js";
 import { registerAuthStatusCommand } from "./auth/status.js";
 import type { Writer } from "../lib/command.js";
 
@@ -17,5 +18,6 @@ export function registerAuthCommands(
     auth.action(() => auth.outputHelp());
     registerAuthApiCommand(auth, stdout, stderr);
     registerAuthClearCommand(auth, stdout);
-    registerAuthStatusCommand(auth, stdout);
+    registerAuthPingCommand(auth, stdout, stderr);
+    registerAuthStatusCommand(auth, stdout, stderr);
 }

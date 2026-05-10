@@ -20,6 +20,9 @@ export type ApiKeyResult = {
     source: ApiKeySource;
 };
 
+const API_KEY_PREVIEW_LENGTH = 19;
+const SHORT_API_KEY_PREVIEW_LENGTH = 4;
+
 export type ClientConfig = {
     baseUrl?: string;
     timeoutMs?: number;
@@ -88,13 +91,24 @@ export async function clearApiKey(options: ConfigOptions = {}) {
     await writeConfig(config, options);
 }
 
+export function maskApiKey(apiKey: string) {
+    const previewLength = apiKey.length >= API_KEY_PREVIEW_LENGTH
+        ? API_KEY_PREVIEW_LENGTH
+        : SHORT_API_KEY_PREVIEW_LENGTH;
+    return `${apiKey.slice(0, previewLength)}....`;
+}
+
 export async function getAuthStatus(options: ConfigOptions = {}) {
     const apiKey = await readApiKey(options);
     if (!apiKey) {
         return { configured: false as const };
     }
 
-    return { configured: true as const, source: apiKey.source };
+    return {
+        configured: true as const,
+        source: apiKey.source,
+        apiKeyPreview: maskApiKey(apiKey.apiKey)
+    };
 }
 
 export async function getClientConfig(options: ConfigOptions = {}): Promise<ClientConfig> {

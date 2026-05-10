@@ -2,9 +2,10 @@ import { password } from "@inquirer/prompts";
 import type { Command } from "commander";
 
 import { validateApiKey } from "../../lib/client.js";
-import { writeApiKey } from "../../lib/config.js";
+import { maskApiKey, writeApiKey } from "../../lib/config.js";
 import { run, type Writer } from "../../lib/command.js";
 import { formatSuccess } from "../../lib/ui.js";
+import { formatAuthDetails } from "./format.js";
 
 export function registerAuthApiCommand(
     auth: Command,
@@ -20,8 +21,15 @@ export function registerAuthApiCommand(
                 mask: "*"
             });
 
-            await validateApiKey(apiKey);
+            const ping = await validateApiKey(apiKey);
             await writeApiKey(apiKey);
-            stdout(formatSuccess("API key saved", "YouViCo CLI is ready to use."));
+            stdout(formatSuccess(
+                "API key saved",
+                [
+                    "YouViCo CLI is ready to use.",
+                    "",
+                    formatAuthDetails(ping.workspace, maskApiKey(apiKey))
+                ].join("\n")
+            ));
         }));
 }

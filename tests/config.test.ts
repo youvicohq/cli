@@ -7,6 +7,7 @@ import {
     clearApiKey,
     getClientConfig,
     getAuthStatus,
+    maskApiKey,
     readApiKey,
     setClientConfig,
     writeApiKey
@@ -57,6 +58,25 @@ describe("config storage", () => {
         await expect(getAuthStatus({ configDir, env: {} })).resolves.toEqual({
             configured: false
         });
+    });
+
+    test("reports auth source and masked api key prefix", async () => {
+        const configDir = await tempConfigDir();
+        await writeApiKey("xpi.live.djlasfnksaABCDEFG", { configDir });
+
+        await expect(getAuthStatus({ configDir, env: {} })).resolves.toEqual({
+            configured: true,
+            source: "config",
+            apiKeyPreview: "xpi.live.djlasfnksa...."
+        });
+    });
+
+    test("masks short api keys without exposing full secret", () => {
+        expect(maskApiKey("short")).toBe("shor....");
+    });
+
+    test("keeps the standard api key prefix visible when no suffix remains", () => {
+        expect(maskApiKey("xpi.live.djlasfnksa")).toBe("xpi.live.djlasfnksa....");
     });
 
     test("clears saved api key without removing client config", async () => {
