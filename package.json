@@ -19,7 +19,7 @@
     "bump": "node scripts/bump.mjs",
     "clean": "node scripts/clean.mjs",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
-    "pack:dry-run": "pnpm pack --dry-run",
+    "pack:dry-run": "npm --cache .npm-cache pack --dry-run --ignore-scripts",
     "prepack": "pnpm run build",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
