@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import packageJson from "../package.json" with { type: "json" };
 import { createProgram } from "../src/cli.js";
 
 describe("contextual help", () => {
@@ -12,7 +13,7 @@ describe("contextual help", () => {
 
         await program.parseAsync(["node", "youvico", "version"]);
 
-        expect(output).toEqual(["1.0.0"]);
+        expect(output).toEqual([packageJson.version]);
     });
 
     test("prints version with -v", async () => {
@@ -23,9 +24,9 @@ describe("contextual help", () => {
         });
         program.exitOverride();
 
-        await expect(program.parseAsync(["node", "youvico", "-v"])).rejects.toThrow("1.0.0");
+        await expect(program.parseAsync(["node", "youvico", "-v"])).rejects.toThrow(packageJson.version);
 
-        expect(output).toEqual(["1.0.0"]);
+        expect(output).toEqual([packageJson.version]);
     });
 
     test("shows auth subcommand help for incomplete auth command", async () => {
