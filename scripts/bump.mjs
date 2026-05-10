@@ -25,12 +25,13 @@ function releasePlan(bump, version = "<version>", runId = "<run-id>") {
             { command: "git", args: ["status", "--porcelain"] },
             { command: "pnpm", args: ["version", bump, "--no-git-tag-version"] },
             { command: "pnpm", args: ["install", "--lockfile-only"] },
+            { command: "node", args: ["scripts/sync-version.mjs"] },
             { command: "pnpm", args: ["run", "typecheck"] },
             { command: "pnpm", args: ["run", "lint"] },
             { command: "pnpm", args: ["test"] },
             { command: "pnpm", args: ["run", "build"] },
             { command: "pnpm", args: ["run", "pack:dry-run"] },
-            { command: "git", args: ["add", "package.json", "pnpm-lock.yaml"] },
+            { command: "git", args: ["add", "package.json", "pnpm-lock.yaml", "src/version.ts"] },
             { command: "git", args: ["commit", "-m", `chore(release): v${version}`] },
             { command: "git", args: ["tag", "-a", `v${version}`, "-m", `v${version}`] },
             { command: "git", args: ["push", "origin", "HEAD", "--follow-tags"] },
@@ -123,13 +124,14 @@ async function main() {
         const version = readPackageVersion();
         const tag = `v${version}`;
 
+        run("node", ["scripts/sync-version.mjs"]);
         run("pnpm", ["run", "typecheck"]);
         run("pnpm", ["run", "lint"]);
         run("pnpm", ["test"]);
         run("pnpm", ["run", "build"]);
         run("pnpm", ["run", "pack:dry-run"]);
 
-        run("git", ["add", "package.json", "pnpm-lock.yaml"]);
+        run("git", ["add", "package.json", "pnpm-lock.yaml", "src/version.ts"]);
         run("git", ["commit", "-m", `chore(release): ${tag}`]);
         run("git", ["tag", "-a", tag, "-m", tag]);
 

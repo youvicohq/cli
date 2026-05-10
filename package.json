@@ -15,9 +15,9 @@
   "sideEffects": false,
   "packageManager": "pnpm@10.32.1",
   "scripts": {
-    "build": "pnpm clean && tsc -p tsconfig.build.json",
+    "build": "node scripts/sync-version.mjs && node scripts/clean.mjs && tsc -p tsconfig.build.json",
     "bump": "node scripts/bump.mjs",
-    "clean": "rm -rf dist coverage",
+    "clean": "node scripts/clean.mjs",
     "lint": "eslint \"{src,tests}/**/*.ts\" --fix",
     "pack:dry-run": "pnpm pack --dry-run",
     "prepack": "pnpm run build",
