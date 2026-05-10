@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { createInterface } from "node:readline/promises";
 
 const VALID_BUMPS = new Set(["patch", "minor", "major"]);
 const WORKFLOW_NAME = "Publish";
@@ -23,7 +24,7 @@ function releasePlan(bump, version = "<version>", runId = "<run-id>") {
         bump,
         commands: [
             { command: "git", args: ["status", "--porcelain"] },
-            { command: "pnpm", args: ["version", bump, "--no-git-tag-version"] },
+            { command: "pnpm", args: ["version", version, "--no-git-tag-version"] },
             { command: "pnpm", args: ["install", "--frozen-lockfile"] },
             { command: "node", args: ["scripts/sync-version.mjs"] },
             { command: "pnpm", args: ["run", "typecheck"] },
@@ -54,6 +55,36 @@ function run(command, args, options = {}) {
 function readPackageVersion() {
     const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
     return packageJson.version;
+}
+
+function nextVersion(version, bump) {
+    const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+    if (!match) {
+        throw new Error(`Invalid package version: ${version}`);
+    }
+
+    const [major, minor, patch] = match.slice(1).map(Number);
+    if (bump === "major") {
+        return `${major + 1}.0.0`;
+    }
+    if (bump === "minor") {
+        return `${major}.${minor + 1}.0`;
+    }
+    return `${major}.${minor}.${patch + 1}`;
+}
+
+async function confirmRelease(version) {
+    const readline = createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    const answer = await readline.question(`Release v${version}? Type "yes" to continue: `);
+    readline.close();
+
+    if (answer.trim() !== "yes") {
+        throw new Error("Release cancelled.");
+    }
 }
 
 function ensureCleanWorktree() {
@@ -118,12 +149,12 @@ async function main() {
         }
 
         ensureCleanWorktree();
-        run("pnpm", ["version", bump, "--no-git-tag-version"]);
-        run("pnpm", ["install", "--frozen-lockfile"]);
-
-        const version = readPackageVersion();
+        const version = nextVersion(readPackageVersion(), bump);
         const tag = `v${version}`;
 
+        await confirmRelease(version);
+        run("pnpm", ["version", version, "--no-git-tag-version"]);
+        run("pnpm", ["install", "--frozen-lockfile"]);
         run("node", ["scripts/sync-version.mjs"]);
         run("pnpm", ["run", "typecheck"]);
         run("pnpm", ["run", "lint"]);
