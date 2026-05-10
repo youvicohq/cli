@@ -27,7 +27,7 @@ describe("bump release script", () => {
         expect(plan.commands).toEqual([
             { command: "git", args: ["status", "--porcelain"] },
             { command: "pnpm", args: ["version", "minor", "--no-git-tag-version"] },
-            { command: "pnpm", args: ["install", "--lockfile-only"] },
+            { command: "pnpm", args: ["install", "--frozen-lockfile"] },
             { command: "node", args: ["scripts/sync-version.mjs"] },
             { command: "pnpm", args: ["run", "typecheck"] },
             { command: "pnpm", args: ["run", "lint"] },

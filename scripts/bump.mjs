@@ -24,7 +24,7 @@ function releasePlan(bump, version = "<version>", runId = "<run-id>") {
         commands: [
             { command: "git", args: ["status", "--porcelain"] },
             { command: "pnpm", args: ["version", bump, "--no-git-tag-version"] },
-            { command: "pnpm", args: ["install", "--lockfile-only"] },
+            { command: "pnpm", args: ["install", "--frozen-lockfile"] },
             { command: "node", args: ["scripts/sync-version.mjs"] },
             { command: "pnpm", args: ["run", "typecheck"] },
             { command: "pnpm", args: ["run", "lint"] },
@@ -119,7 +119,7 @@ async function main() {
 
         ensureCleanWorktree();
         run("pnpm", ["version", bump, "--no-git-tag-version"]);
-        run("pnpm", ["install", "--lockfile-only"]);
+        run("pnpm", ["install", "--frozen-lockfile"]);
 
         const version = readPackageVersion();
         const tag = `v${version}`;
