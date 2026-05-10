@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { Command, CommanderError } from "commander";
 
 import { registerAuthCommands } from "./commands/auth.js";
@@ -11,6 +13,19 @@ import { registerReactionCommands } from "./commands/reaction.js";
 import { createClient } from "./lib/client.js";
 import { formatError } from "./lib/errors.js";
 import { CLI_VERSION } from "./version.js";
+
+export function isEntrypoint(argvPath: string | undefined, moduleUrl: string) {
+    if (!argvPath) {
+        return false;
+    }
+
+    try {
+        return realpathSync(argvPath) === realpathSync(fileURLToPath(moduleUrl));
+    }
+    catch {
+        return false;
+    }
+}
 
 export function createProgram(deps: {
     stdout?: (message: string) => void;
@@ -51,7 +66,7 @@ export function createProgram(deps: {
     return program;
 }
 
-if (process.argv[1] && process.argv[1].endsWith("cli.js")) {
+if (isEntrypoint(process.argv[1], import.meta.url)) {
     createProgram().parseAsync(process.argv).catch((error: unknown) => {
         if (error instanceof CommanderError) {
             process.exitCode = error.exitCode;
