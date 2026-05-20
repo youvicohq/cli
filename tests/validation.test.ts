@@ -45,6 +45,8 @@ describe("command validation", () => {
         await program.parseAsync(["node", "youvico", "file", "update", "--id", "file-id"]);
 
         expect(output.join("\n")).toContain("Provide at least one update option");
+        expect(output.join("\n")).toContain("--folder");
+        expect(output.join("\n")).toContain("--clear-folder");
         expect(process.exitCode).toBe(1);
     });
 
@@ -69,5 +71,103 @@ describe("command validation", () => {
 
         expect(output.join("\n")).toContain("Use either --description or --clear-description");
         expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects conflicting file folder options", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "file",
+            "update",
+            "--id",
+            "file-id",
+            "--folder",
+            "folder-id",
+            "--clear-folder"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --folder or --clear-folder");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects invalid comment anchor", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(
+            program.parseAsync([
+                "node",
+                "youvico",
+                "comment",
+                "create",
+                "--file",
+                "file-id",
+                "--content",
+                "hello",
+                "--anchor",
+                "abc"
+            ])
+        ).rejects.toThrow("process.exit unexpectedly called");
+        expect(output.join("\n")).toContain("must be a non-negative integer");
+    });
+
+    test("rejects invalid comment duration", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(
+            program.parseAsync([
+                "node",
+                "youvico",
+                "comment",
+                "create",
+                "--file",
+                "file-id",
+                "--content",
+                "hello",
+                "--duration",
+                "0"
+            ])
+        ).rejects.toThrow("process.exit unexpectedly called");
+        expect(output.join("\n")).toContain("must be a positive integer");
+    });
+
+    test("rejects fractional comment duration", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(
+            program.parseAsync([
+                "node",
+                "youvico",
+                "comment",
+                "create",
+                "--file",
+                "file-id",
+                "--content",
+                "hello",
+                "--duration",
+                "0.5"
+            ])
+        ).rejects.toThrow("process.exit unexpectedly called");
+        expect(output.join("\n")).toContain("must be a positive integer");
     });
 });

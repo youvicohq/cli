@@ -21,7 +21,7 @@ describe("release configuration", () => {
                 version: {
                     allowBranch: "main",
                     forcePublish: true,
-                    message: "chore(release): v%s",
+                    message: "chore(release): %s",
                     noPrivate: true,
                     push: false,
                     yes: true
