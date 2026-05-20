@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { realpathSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Command, CommanderError } from "commander";
 
@@ -12,7 +12,8 @@ import { registerProjectCommands } from "./commands/project.js";
 import { registerReactionCommands } from "./commands/reaction.js";
 import { createClient } from "./lib/client.js";
 import { formatError } from "./lib/errors.js";
-import { CLI_VERSION } from "./version.js";
+
+const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 export function isEntrypoint(argvPath: string | undefined, moduleUrl: string) {
     if (!argvPath) {
@@ -43,7 +44,7 @@ export function createProgram(deps: {
     program
         .name("youvico")
         .description("YouViCo command-line interface")
-        .version(CLI_VERSION, "-v, --version", "print CLI version")
+        .version(version, "-v, --version", "print CLI version")
         .showHelpAfterError()
         .configureOutput({
             writeOut: message => stdout(message.trimEnd()),
@@ -53,7 +54,7 @@ export function createProgram(deps: {
     program
         .command("version")
         .description("Print CLI version")
-        .action(() => stdout(CLI_VERSION));
+        .action(() => stdout(version));
 
     registerAuthCommands(program, stdout, stderr);
     registerConfigCommands(program, stdout, stderr);
