@@ -13,7 +13,7 @@ export function registerCreateCommentCommand(
         .requiredOption("--content <content>", "comment content")
         .option("--parent <parent>", "parent comment ID for a reply")
         .addOption(new Option("--anchor <anchor>", "video timestamp in milliseconds or document page number").argParser(parseNonNegativeInteger))
-        .addOption(new Option("--duration <duration>", "comment duration in seconds").argParser(parsePositiveInteger))
+        .addOption(new Option("--duration <duration>", "comment duration in the same unit as anchor").argParser(parsePositiveInteger))
         .action(run(context.stderr, async (options) => {
             const youvico = await context.getClient();
             const result = await youvico.comments.create(options.file, {
