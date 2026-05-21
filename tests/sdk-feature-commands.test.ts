@@ -23,7 +23,7 @@ vi.mock("@youvico/api", () => ({
     Client: mocks.Client
 }));
 
-describe("SDK 1.2 command features", () => {
+describe("SDK 1.3 command features", () => {
     const originalApiKey = process.env.YOUVICO_API_KEY;
 
     beforeEach(() => {
@@ -72,7 +72,7 @@ describe("SDK 1.2 command features", () => {
             content: "Needs a trim",
             anchor: 1200,
             duration: 3,
-            parentId: undefined
+            parent: undefined
         });
         expect(output.join("\n")).toContain("comment-id");
     });
@@ -105,9 +105,42 @@ describe("SDK 1.2 command features", () => {
             content: "Start here",
             anchor: 0,
             duration: 1,
-            parentId: undefined
+            parent: undefined
         });
         expect(output.join("\n")).toContain("comment-id");
+    });
+
+    test("comment create passes a parent object for replies", async () => {
+        mocks.commentsCreate.mockResolvedValueOnce({ data: { id: "reply-id" } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--file",
+            "file-id",
+            "--content",
+            "Replying here",
+            "--parent",
+            "parent-comment-id"
+        ]);
+
+        expect(mocks.commentsCreate).toHaveBeenCalledWith("file-id", {
+            content: "Replying here",
+            anchor: undefined,
+            duration: undefined,
+            parent: {
+                id: "parent-comment-id"
+            }
+        });
+        expect(output.join("\n")).toContain("reply-id");
     });
 
     test("file update passes a folder assignment to the SDK", async () => {
