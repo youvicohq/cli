@@ -20,9 +20,11 @@ export function registerCreateCommentCommand(
                 content: options.content,
                 anchor: options.anchor,
                 duration: options.duration,
-                parent: options.parent === undefined ? undefined : {
-                    id: options.parent
-                }
+                parent: options.parent === undefined
+                    ? undefined
+                    : {
+                            id: options.parent
+                        }
             });
             output(context.program, options, context.stdout, result);
         }));
