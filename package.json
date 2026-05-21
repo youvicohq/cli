@@ -1,6 +1,6 @@
 {
   "name": "@youvico/cli",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Official command-line interface for YouViCo",
   "author": "YouViCo",
   "license": "MIT",
