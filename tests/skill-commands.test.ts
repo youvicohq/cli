@@ -189,6 +189,35 @@ describe("SDK 1.4 skill commands", () => {
         expect(output.join("\n")).toContain("\"ok\": true");
     });
 
+    test("skill update passes cleared optional fields to the SDK", async () => {
+        mocks.skillsUpdate.mockResolvedValueOnce(undefined);
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "skill",
+            "update",
+            "--id",
+            "skill-id",
+            "--clear-metadata",
+            "--clear-allowed-tools",
+            "--clear-license"
+        ]);
+
+        expect(mocks.skillsUpdate).toHaveBeenCalledWith("skill-id", {
+            metadata: null,
+            allowedTools: null,
+            license: null
+        });
+        expect(output.join("\n")).toContain("\"ok\": true");
+    });
+
     test("skill-version publish passes inline markdown content", async () => {
         mocks.skillsPublishVersion.mockResolvedValueOnce({
             data: {

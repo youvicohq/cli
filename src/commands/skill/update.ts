@@ -15,10 +15,23 @@ export function registerUpdateSkillCommand(
         .option("--name <name>", "skill name")
         .option("--description <description>", "skill description")
         .addOption(new Option("--metadata <json>", "JSON object with string metadata values").argParser(parseMetadata))
+        .option("--clear-metadata", "clear skill metadata")
         .option("--allowed-tool <tool>", "allowed tool identifier (repeatable)", collectAllowedTool)
+        .option("--clear-allowed-tools", "clear allowed tool identifiers")
         .option("--license <license>", "skill license")
+        .option("--clear-license", "clear skill license")
         .option("--default-version <version>", "default skill version ID")
         .action(run(context.stderr, async (options) => {
+            if (options.metadata !== undefined && options.clearMetadata) {
+                throw new Error("Use either --metadata or --clear-metadata, not both.");
+            }
+            if (options.allowedTool !== undefined && options.clearAllowedTools) {
+                throw new Error("Use either --allowed-tool or --clear-allowed-tools, not both.");
+            }
+            if (options.license !== undefined && options.clearLicense) {
+                throw new Error("Use either --license or --clear-license, not both.");
+            }
+
             const updates: UpdateSkillParams = {};
 
             if (options.name !== undefined) {
@@ -27,13 +40,22 @@ export function registerUpdateSkillCommand(
             if (options.description !== undefined) {
                 updates.description = options.description;
             }
-            if (options.metadata !== undefined) {
+            if (options.clearMetadata) {
+                updates.metadata = null;
+            }
+            else if (options.metadata !== undefined) {
                 updates.metadata = options.metadata;
             }
-            if (options.allowedTool !== undefined) {
+            if (options.clearAllowedTools) {
+                updates.allowedTools = null;
+            }
+            else if (options.allowedTool !== undefined) {
                 updates.allowedTools = options.allowedTool;
             }
-            if (options.license !== undefined) {
+            if (options.clearLicense) {
+                updates.license = null;
+            }
+            else if (options.license !== undefined) {
                 updates.license = options.license;
             }
             if (options.defaultVersion !== undefined) {
@@ -43,7 +65,7 @@ export function registerUpdateSkillCommand(
             }
 
             if (Object.keys(updates).length === 0) {
-                throw new Error("Provide at least one update option: --name, --description, --metadata, --allowed-tool, --license, or --default-version.");
+                throw new Error("Provide at least one update option: --name, --description, --metadata, --clear-metadata, --allowed-tool, --clear-allowed-tools, --license, --clear-license, or --default-version.");
             }
 
             const youvico = await context.getClient();

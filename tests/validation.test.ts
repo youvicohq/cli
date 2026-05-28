@@ -185,6 +185,35 @@ describe("command validation", () => {
         expect(process.exitCode).toBe(1);
     });
 
+    test("rejects conflicting skill optional field update options", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "skill",
+            "update",
+            "--id",
+            "skill-id",
+            "--metadata",
+            "{\"tier\":\"internal\"}",
+            "--clear-metadata",
+            "--allowed-tool",
+            "slack",
+            "--clear-allowed-tools",
+            "--license",
+            "MIT",
+            "--clear-license"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --metadata or --clear-metadata");
+        expect(process.exitCode).toBe(1);
+    });
+
     test("rejects skill-version content-file option", async () => {
         const output: string[] = [];
         const program = createProgram({
