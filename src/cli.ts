@@ -10,6 +10,8 @@ import { registerFileCommands } from "./commands/file.js";
 import { registerFolderCommands } from "./commands/folder.js";
 import { registerProjectCommands } from "./commands/project.js";
 import { registerReactionCommands } from "./commands/reaction.js";
+import { registerSkillCommands } from "./commands/skill.js";
+import { registerSkillVersionCommands } from "./commands/skill-version.js";
 import { createClient } from "./lib/client.js";
 import { formatError } from "./lib/errors.js";
 
@@ -63,6 +65,8 @@ export function createProgram(deps: {
     registerFolderCommands(program, stdout, stderr, getClient);
     registerCommentCommands(program, stdout, stderr, getClient);
     registerReactionCommands(program, stdout, stderr, getClient);
+    registerSkillCommands(program, stdout, stderr, getClient);
+    registerSkillVersionCommands(program, stdout, stderr, getClient);
 
     return program;
 }

@@ -127,4 +127,38 @@ describe("contextual help", () => {
         expect(help).toContain("create");
         expect(help).toContain("delete");
     });
+
+    test("shows skill subcommand help", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await program.parseAsync(["node", "youvico", "skill"]);
+
+        const help = output.join("\n");
+        expect(help).toContain("list");
+        expect(help).toContain("get");
+        expect(help).toContain("create");
+        expect(help).toContain("update");
+        expect(help).toContain("delete");
+    });
+
+    test("shows skill-version subcommand help", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await program.parseAsync(["node", "youvico", "skill-version"]);
+
+        const help = output.join("\n");
+        expect(help).toContain("publish");
+        expect(help).toContain("get");
+        expect(help).toContain("delete");
+    });
 });

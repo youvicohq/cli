@@ -46,6 +46,8 @@ youvico file --help
 youvico folder --help
 youvico comment --help
 youvico reaction --help
+youvico skill --help
+youvico skill-version --help
 ```
 
 Use `--help` on any command for available options and examples:

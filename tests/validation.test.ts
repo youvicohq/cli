@@ -170,4 +170,44 @@ describe("command validation", () => {
         ).rejects.toThrow("process.exit unexpectedly called");
         expect(output.join("\n")).toContain("must be a positive integer");
     });
+
+    test("rejects skill update without update fields", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync(["node", "youvico", "skill", "update", "--id", "skill-id"]);
+
+        expect(output.join("\n")).toContain("Provide at least one update option");
+        expect(output.join("\n")).toContain("--default-version");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects skill-version content-file option", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(
+            program.parseAsync([
+                "node",
+                "youvico",
+                "skill-version",
+                "publish",
+                "--skill",
+                "skill-id",
+                "--content",
+                "inline",
+                "--content-file",
+                "SKILL.md"
+            ])
+        ).rejects.toThrow("process.exit unexpectedly called");
+
+        expect(output.join("\n")).toContain("unknown option '--content-file'");
+    });
 });
