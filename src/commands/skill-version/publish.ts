@@ -12,11 +12,16 @@ export function registerPublishSkillVersionCommand(
         .description("Publish a skill version")
         .requiredOption("--skill <skill>", "skill ID")
         .requiredOption("--content <content>", "skill markdown content")
+        .option("--note <note>", "skill version note")
         .option("--default", "make this version the default")
         .action(run(context.stderr, async (options) => {
             const params: PublishSkillVersionParams = {
                 content: options.content
             };
+
+            if (options.note !== undefined) {
+                params.note = options.note;
+            }
 
             if (options.default) {
                 params.isDefault = true;

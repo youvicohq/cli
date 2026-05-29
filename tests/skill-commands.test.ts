@@ -41,7 +41,7 @@ vi.mock("@youvico/api", () => ({
     Client: mocks.Client
 }));
 
-describe("SDK 1.4 skill commands", () => {
+describe("SDK 1.5 skill commands", () => {
     const originalApiKey = process.env.YOUVICO_API_KEY;
 
     beforeEach(() => {
@@ -249,6 +249,41 @@ describe("SDK 1.4 skill commands", () => {
             isDefault: true
         });
         expect(output.join("\n")).toContain("version-id");
+    });
+
+    test("skill-version publish passes note to the SDK", async () => {
+        mocks.skillsPublishVersion.mockResolvedValueOnce({
+            data: {
+                id: "version-id",
+                version: 3,
+                note: "Initial public draft"
+            }
+        });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "skill-version",
+            "publish",
+            "--skill",
+            "skill-id",
+            "--content",
+            "# Review helper\n",
+            "--note",
+            "Initial public draft"
+        ]);
+
+        expect(mocks.skillsPublishVersion).toHaveBeenCalledWith("skill-id", {
+            content: "# Review helper\n",
+            note: "Initial public draft"
+        });
+        expect(output.join("\n")).toContain("Initial public draft");
     });
 
     test("skill-version get prints markdown response", async () => {
