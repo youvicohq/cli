@@ -98,7 +98,6 @@ describe("contextual help", () => {
         expect(help).toContain("delete.cancel");
     });
 
-
     test("shows folder subcommand help", async () => {
         const output: string[] = [];
         const program = createProgram({
