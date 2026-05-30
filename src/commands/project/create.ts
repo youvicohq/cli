@@ -21,7 +21,7 @@ export function registerCreateProjectCommand(
                 name: options.name,
                 deadline: options.deadline,
                 description: options.description,
-                members: options.member ?? [],
+                members: options.member,
                 accessRange: options.accessRange as ProjectAccessRange
             };
 

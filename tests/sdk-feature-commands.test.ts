@@ -273,6 +273,38 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("project-id");
     });
 
+    test("project create leaves members undefined when no member is provided", async () => {
+        mocks.projectsCreate.mockResolvedValueOnce({ data: { id: "project-id" } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "project",
+            "create",
+            "--name",
+            "Launch",
+            "--deadline",
+            "2026-06-30",
+            "--access-range",
+            "ONLY_PROJECT_MEMBER"
+        ]);
+
+        expect(mocks.projectsCreate).toHaveBeenCalledWith({
+            name: "Launch",
+            deadline: "2026-06-30",
+            description: undefined,
+            accessRange: "ONLY_PROJECT_MEMBER",
+            members: undefined
+        });
+        expect(output.join("\n")).toContain("project-id");
+    });
+
     test("project update passes only provided SDK 1.6 fields", async () => {
         mocks.projectsUpdate.mockResolvedValueOnce(undefined);
         const { createProgram } = await import("../src/cli.js");
