@@ -79,6 +79,26 @@ describe("contextual help", () => {
         expect(help).toContain("clear");
     });
 
+    test("shows project subcommand help", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await program.parseAsync(["node", "youvico", "project"]);
+
+        const help = output.join("\n");
+        expect(help).toContain("create");
+        expect(help).toContain("search");
+        expect(help).toContain("get");
+        expect(help).toContain("update");
+        expect(help).toContain("delete.schedule");
+        expect(help).toContain("delete.cancel");
+    });
+
+
     test("shows folder subcommand help", async () => {
         const output: string[] = [];
         const program = createProgram({
@@ -108,6 +128,8 @@ describe("contextual help", () => {
 
         const help = output.join("\n");
         expect(help).toContain("create");
+        expect(help).toContain("update");
+        expect(help).toContain("delete");
         expect(help).toContain("replies");
         expect(help).not.toContain("reply [options]");
     });

@@ -11,8 +11,8 @@ importers:
         specifier: ^7.2.1
         version: 7.10.1(@types/node@22.19.18)
       "@youvico/api":
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.6.0
+        version: 1.6.0
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -1454,10 +1454,10 @@ packages:
         integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==,
       }
 
-  "@youvico/api@1.5.0":
+  "@youvico/api@1.6.0":
     resolution:
       {
-        integrity: sha512-UjjTqJsOqBNwXOQEbvgzqtD7ZI3cPiEkAOqLpH+S4LSFJjDMOytz9kebTMB8bb/z99QSfQTmHPiXmXK5kg0qlw==,
+        integrity: sha512-oIMLn2NOSCZMBalyIgNMlF4M5cPQsbHUJ3gSQrFdb4bzWYfrL8X8pfruMz7M+0YZmWNJCBb9wbZYoGVbhS2yuA==,
       }
     engines: { node: ">=18", npm: ">=8.6.0" }
 
@@ -5816,7 +5816,7 @@ snapshots:
 
   "@yarnpkg/lockfile@1.1.0": {}
 
-  "@youvico/api@1.5.0":
+  "@youvico/api@1.6.0":
     dependencies:
       unicode-emoji-json: 0.8.0
 

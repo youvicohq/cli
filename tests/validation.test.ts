@@ -35,6 +35,70 @@ describe("command validation", () => {
         expect(output.join("\n")).toContain("must be a positive integer");
     });
 
+    test("rejects invalid project member", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await expect(
+            program.parseAsync([
+                "node",
+                "youvico",
+                "project",
+                "create",
+                "--name",
+                "Launch",
+                "--deadline",
+                "2026-06-30",
+                "--access-range",
+                "ONLY_PROJECT_MEMBER",
+                "--member",
+                "user-id:OWNER"
+            ])
+        ).rejects.toThrow("process.exit unexpectedly called");
+        expect(output.join("\n")).toContain("must be userId:PROJECT_MANAGER");
+    });
+
+    test("rejects project update without update fields", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync(["node", "youvico", "project", "update", "--id", "project-id"]);
+
+        expect(output.join("\n")).toContain("Provide at least one update option");
+        expect(output.join("\n")).toContain("--access-range");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects conflicting project description options", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "project",
+            "update",
+            "--id",
+            "project-id",
+            "--description",
+            "hello",
+            "--clear-description"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --description or --clear-description");
+        expect(process.exitCode).toBe(1);
+    });
+
     test("rejects file update without update fields", async () => {
         const output: string[] = [];
         const program = createProgram({
