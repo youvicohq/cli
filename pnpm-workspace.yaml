@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: true
+  nx: true
+minimumReleaseAgeExclude:
+  - '@youvico/api@2.0.0'

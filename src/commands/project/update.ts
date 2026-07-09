@@ -15,7 +15,6 @@ export function registerUpdateProjectCommand(
         .option("--name <name>", "project name")
         .option("--description <description>", "project description")
         .option("--clear-description", "clear project description")
-        .option("--deadline <deadline>", "deadline date in YYYY-MM-DD format")
         .addOption(new Option("--access-range <accessRange>", "project access policy").choices(projectAccessRanges))
         .action(run(context.stderr, async (options) => {
             if (options.description !== undefined && options.clearDescription) {
@@ -33,15 +32,12 @@ export function registerUpdateProjectCommand(
             else if (options.description !== undefined) {
                 updates.description = options.description;
             }
-            if (options.deadline !== undefined) {
-                updates.deadline = options.deadline;
-            }
             if (options.accessRange !== undefined) {
                 updates.accessRange = options.accessRange as ProjectAccessRange;
             }
 
             if (Object.keys(updates).length === 0) {
-                throw new Error("Provide at least one update option: --name, --description, --clear-description, --deadline, or --access-range.");
+                throw new Error("Provide at least one update option: --name, --description, --clear-description, or --access-range.");
             }
 
             const youvico = await context.getClient();

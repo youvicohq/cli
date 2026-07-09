@@ -12,14 +12,12 @@ export function registerCreateProjectCommand(
         .command("create")
         .description("Create a project")
         .requiredOption("--name <name>", "project name")
-        .requiredOption("--deadline <deadline>", "deadline date in YYYY-MM-DD format")
         .option("--description <description>", "project description")
         .addOption(new Option("--access-range <accessRange>", "project access policy").choices(projectAccessRanges).makeOptionMandatory())
         .option("--member <member>", "project member as userId:role (repeatable)", collectProjectMember)
         .action(run(context.stderr, async (options) => {
             const params: CreateProjectParams = {
                 name: options.name,
-                deadline: options.deadline,
                 description: options.description,
                 members: options.member,
                 accessRange: options.accessRange as ProjectAccessRange

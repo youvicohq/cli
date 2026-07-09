@@ -13,7 +13,7 @@
     "dist/**/*"
   ],
   "sideEffects": false,
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@11.7.0",
   "scripts": {
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist coverage",
@@ -42,7 +42,7 @@
   "homepage": "https://github.com/youvicohq/cli#readme",
   "dependencies": {
     "@inquirer/prompts": "^7.2.1",
-    "@youvico/api": "^1.6.1",
+    "@youvico/api": "^2.0.0",
     "commander": "^12.1.0"
   },
   "devDependencies": {

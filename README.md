@@ -32,6 +32,7 @@ You can also provide an API key with `YOUVICO_API_KEY`.
 youvico project search --query="launch"
 youvico file upload.file --project=<project-id> --path=./file.mp4
 youvico comment list --file=<file-id>
+youvico comment list --project=<project-id>
 ```
 
 Command results are printed as JSON.

@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
     const commentsDelete = vi.fn();
-    const commentsCreate = vi.fn();
+    const commentsCreateForFile = vi.fn();
+    const commentsCreateForProject = vi.fn();
+    const commentsListForFile = vi.fn();
+    const commentsListForProject = vi.fn();
     const commentsUpdate = vi.fn();
     const filesUpdate = vi.fn();
     const projectsCancelDeletion = vi.fn();
@@ -11,8 +14,11 @@ const mocks = vi.hoisted(() => {
     const projectsUpdate = vi.fn();
     const Client = vi.fn(() => ({
         comments: {
-            create: commentsCreate,
+            createForFile: commentsCreateForFile,
+            createForProject: commentsCreateForProject,
             delete: commentsDelete,
+            listForFile: commentsListForFile,
+            listForProject: commentsListForProject,
             update: commentsUpdate
         },
         files: {
@@ -29,7 +35,10 @@ const mocks = vi.hoisted(() => {
     return {
         Client,
         commentsDelete,
-        commentsCreate,
+        commentsCreateForFile,
+        commentsCreateForProject,
+        commentsListForFile,
+        commentsListForProject,
         commentsUpdate,
         filesUpdate,
         projectsCancelDeletion,
@@ -50,7 +59,10 @@ describe("SDK feature commands", () => {
         process.env.YOUVICO_API_KEY = "xpi.live.djlasfnksaABCDEFG";
         mocks.Client.mockClear();
         mocks.commentsDelete.mockReset();
-        mocks.commentsCreate.mockReset();
+        mocks.commentsCreateForFile.mockReset();
+        mocks.commentsCreateForProject.mockReset();
+        mocks.commentsListForFile.mockReset();
+        mocks.commentsListForProject.mockReset();
         mocks.commentsUpdate.mockReset();
         mocks.filesUpdate.mockReset();
         mocks.projectsCancelDeletion.mockReset();
@@ -70,8 +82,8 @@ describe("SDK feature commands", () => {
         process.env.YOUVICO_API_KEY = originalApiKey;
     });
 
-    test("comment create passes anchor and duration to the SDK", async () => {
-        mocks.commentsCreate.mockResolvedValueOnce({ data: { id: "comment-id" } });
+    test("file comment create passes anchor and duration to the SDK", async () => {
+        mocks.commentsCreateForFile.mockResolvedValueOnce({ data: { id: "comment-id" } });
         const { createProgram } = await import("../src/cli.js");
         const output: string[] = [];
         const program = createProgram({
@@ -94,7 +106,7 @@ describe("SDK feature commands", () => {
             "3"
         ]);
 
-        expect(mocks.commentsCreate).toHaveBeenCalledWith("file-id", {
+        expect(mocks.commentsCreateForFile).toHaveBeenCalledWith("file-id", {
             content: "Needs a trim",
             anchor: 1200,
             duration: 3,
@@ -103,8 +115,8 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("comment-id");
     });
 
-    test("comment create allows a zero millisecond anchor", async () => {
-        mocks.commentsCreate.mockResolvedValueOnce({ data: { id: "comment-id" } });
+    test("file comment create allows a zero millisecond anchor", async () => {
+        mocks.commentsCreateForFile.mockResolvedValueOnce({ data: { id: "comment-id" } });
         const { createProgram } = await import("../src/cli.js");
         const output: string[] = [];
         const program = createProgram({
@@ -127,7 +139,7 @@ describe("SDK feature commands", () => {
             "1"
         ]);
 
-        expect(mocks.commentsCreate).toHaveBeenCalledWith("file-id", {
+        expect(mocks.commentsCreateForFile).toHaveBeenCalledWith("file-id", {
             content: "Start here",
             anchor: 0,
             duration: 1,
@@ -136,8 +148,8 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("comment-id");
     });
 
-    test("comment create passes a parent object for replies", async () => {
-        mocks.commentsCreate.mockResolvedValueOnce({ data: { id: "reply-id" } });
+    test("file comment create passes a parent object for replies", async () => {
+        mocks.commentsCreateForFile.mockResolvedValueOnce({ data: { id: "reply-id" } });
         const { createProgram } = await import("../src/cli.js");
         const output: string[] = [];
         const program = createProgram({
@@ -158,7 +170,7 @@ describe("SDK feature commands", () => {
             "parent-comment-id"
         ]);
 
-        expect(mocks.commentsCreate).toHaveBeenCalledWith("file-id", {
+        expect(mocks.commentsCreateForFile).toHaveBeenCalledWith("file-id", {
             content: "Replying here",
             anchor: undefined,
             duration: undefined,
@@ -167,6 +179,84 @@ describe("SDK feature commands", () => {
             }
         });
         expect(output.join("\n")).toContain("reply-id");
+    });
+
+    test("project comment create calls the project comment SDK endpoint", async () => {
+        mocks.commentsCreateForProject.mockResolvedValueOnce({ data: { id: "comment-id" } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--project",
+            "project-id",
+            "--content",
+            "Project note",
+            "--parent",
+            "parent-comment-id"
+        ]);
+
+        expect(mocks.commentsCreateForProject).toHaveBeenCalledWith("project-id", {
+            content: "Project note",
+            parent: {
+                id: "parent-comment-id"
+            }
+        });
+        expect(output.join("\n")).toContain("comment-id");
+    });
+
+    test("comment list dispatches to file and project SDK endpoints", async () => {
+        mocks.commentsListForFile.mockResolvedValueOnce({ data: [], page: { next: null, prev: null } });
+        mocks.commentsListForProject.mockResolvedValueOnce({ data: [], page: { next: null, prev: null } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const fileProgram = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await fileProgram.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "list",
+            "--file",
+            "file-id",
+            "--next",
+            "next-cursor"
+        ]);
+        const projectProgram = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await projectProgram.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "list",
+            "--project",
+            "project-id",
+            "--prev",
+            "prev-cursor"
+        ]);
+
+        expect(mocks.commentsListForFile).toHaveBeenCalledWith("file-id", {
+            next: "next-cursor",
+            prev: undefined
+        });
+        expect(mocks.commentsListForProject).toHaveBeenCalledWith("project-id", {
+            next: undefined,
+            prev: "prev-cursor"
+        });
+        expect(output.join("\n")).toContain("\"data\": []");
     });
 
     test("file update passes a folder assignment to the SDK", async () => {
@@ -222,7 +312,7 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("\"ok\": true");
     });
 
-    test("project create passes SDK 1.6 project fields", async () => {
+    test("project create passes SDK 2.0 project fields", async () => {
         mocks.projectsCreate.mockResolvedValueOnce({ data: { id: "project-id" } });
         const { createProgram } = await import("../src/cli.js");
         const output: string[] = [];
@@ -238,8 +328,6 @@ describe("SDK feature commands", () => {
             "create",
             "--name",
             "Launch",
-            "--deadline",
-            "2026-06-30",
             "--description",
             "Campaign launch",
             "--access-range",
@@ -252,7 +340,6 @@ describe("SDK feature commands", () => {
 
         expect(mocks.projectsCreate).toHaveBeenCalledWith({
             name: "Launch",
-            deadline: "2026-06-30",
             description: "Campaign launch",
             accessRange: "ALLOW_WORKSPACE_MEMBER",
             members: [
@@ -289,15 +376,12 @@ describe("SDK feature commands", () => {
             "create",
             "--name",
             "Launch",
-            "--deadline",
-            "2026-06-30",
             "--access-range",
             "ONLY_PROJECT_MEMBER"
         ]);
 
         expect(mocks.projectsCreate).toHaveBeenCalledWith({
             name: "Launch",
-            deadline: "2026-06-30",
             description: undefined,
             accessRange: "ONLY_PROJECT_MEMBER",
             members: undefined
@@ -305,7 +389,7 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("project-id");
     });
 
-    test("project update passes only provided SDK 1.6 fields", async () => {
+    test("project update passes only provided SDK 2.0 fields", async () => {
         mocks.projectsUpdate.mockResolvedValueOnce(undefined);
         const { createProgram } = await import("../src/cli.js");
         const output: string[] = [];
@@ -322,21 +406,18 @@ describe("SDK feature commands", () => {
             "--id",
             "project-id",
             "--clear-description",
-            "--deadline",
-            "2026-07-15",
             "--access-range",
             "ONLY_PROJECT_MEMBER"
         ]);
 
         expect(mocks.projectsUpdate).toHaveBeenCalledWith("project-id", {
             description: null,
-            deadline: "2026-07-15",
             accessRange: "ONLY_PROJECT_MEMBER"
         });
         expect(output.join("\n")).toContain("\"ok\": true");
     });
 
-    test("project delete.schedule and delete.cancel call SDK 1.6 deletion endpoints", async () => {
+    test("project delete.schedule and delete.cancel call SDK deletion endpoints", async () => {
         mocks.projectsScheduleDeletion.mockResolvedValueOnce(undefined);
         mocks.projectsCancelDeletion.mockResolvedValueOnce(undefined);
         const { createProgram } = await import("../src/cli.js");
@@ -355,7 +436,7 @@ describe("SDK feature commands", () => {
         expect(output.join("\n")).toContain("Project deletion cancelled");
     });
 
-    test("comment update and delete call SDK 1.6 comment endpoints", async () => {
+    test("comment update and delete call SDK comment endpoints", async () => {
         mocks.commentsUpdate.mockResolvedValueOnce(undefined);
         mocks.commentsDelete.mockResolvedValueOnce(undefined);
         const { createProgram } = await import("../src/cli.js");

@@ -51,8 +51,6 @@ describe("command validation", () => {
                 "create",
                 "--name",
                 "Launch",
-                "--deadline",
-                "2026-06-30",
                 "--access-range",
                 "ONLY_PROJECT_MEMBER",
                 "--member",
@@ -233,6 +231,114 @@ describe("command validation", () => {
             ])
         ).rejects.toThrow("process.exit unexpectedly called");
         expect(output.join("\n")).toContain("must be a positive integer");
+    });
+
+    test("rejects comment create without file or project target", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--content",
+            "hello"
+        ]);
+
+        expect(output.join("\n")).toContain("Provide either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects comment list without file or project target", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "list"
+        ]);
+
+        expect(output.join("\n")).toContain("Provide either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects conflicting comment list targets", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "list",
+            "--file",
+            "file-id",
+            "--project",
+            "project-id"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects conflicting comment create targets", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--file",
+            "file-id",
+            "--project",
+            "project-id",
+            "--content",
+            "hello"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects timeline options for project comments", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--project",
+            "project-id",
+            "--content",
+            "hello",
+            "--anchor",
+            "1"
+        ]);
+
+        expect(output.join("\n")).toContain("Use --anchor and --duration only with --file");
+        expect(process.exitCode).toBe(1);
     });
 
     test("rejects skill update without update fields", async () => {
