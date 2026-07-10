@@ -1,3 +1,4 @@
+import type { CommentAttachmentReference } from "@youvico/api";
 import { InvalidArgumentError, Option, type Command } from "commander";
 
 import { output, run, type CommandContext } from "../../lib/command.js";
@@ -11,31 +12,62 @@ export function registerCreateCommentCommand(
         .description("Create a comment on a file or project")
         .option("--file <file>", "file ID")
         .option("--project <project>", "project ID")
-        .requiredOption("--content <content>", "comment content")
+        .option("--content <content>", "comment content")
         .option("--parent <parent>", "parent comment ID for a reply")
+        .option("--attachment <attachment>", "uploaded comment attachment ID (repeatable)", collectAttachment)
         .addOption(new Option("--anchor <anchor>", "video timestamp in milliseconds or document page number").argParser(parseNonNegativeInteger))
         .addOption(new Option("--duration <duration>", "comment duration in the same unit as anchor").argParser(parsePositiveInteger))
         .action(run(context.stderr, async (options) => {
             const target = resolveCommentTarget(options);
+            validateCommentContent(options);
             const youvico = await context.getClient();
             const parent = options.parent === undefined
                 ? undefined
                 : {
                         id: options.parent
                     };
+            const attachments = options.attachment;
             const result = target.type === "file"
                 ? await youvico.comments.createForFile(target.id, {
                         content: options.content,
                         anchor: options.anchor,
                         duration: options.duration,
-                        parent
+                        parent,
+                        attachments
                     })
                 : await youvico.comments.createForProject(target.id, {
                         content: options.content,
-                        parent
+                        parent,
+                        attachments
                     });
             output(context.program, options, context.stdout, result);
         }));
+}
+
+function collectAttachment(
+    id: string,
+    previous: CommentAttachmentReference[] | undefined
+) {
+    return [...previous ?? [], { id }];
+}
+
+function validateCommentContent(options: {
+    content?: string;
+    anchor?: number;
+    duration?: number;
+    attachment?: CommentAttachmentReference[];
+}) {
+    if (options.duration !== undefined && options.anchor === undefined) {
+        throw new Error("Use --duration only with --anchor.");
+    }
+
+    if (
+        options.content === undefined &&
+        options.anchor === undefined &&
+        options.attachment === undefined
+    ) {
+        throw new Error("Provide --content, timeline options, or at least one --attachment.");
+    }
 }
 
 function resolveCommentTarget(options: { file?: string; project?: string; anchor?: number; duration?: number }) {

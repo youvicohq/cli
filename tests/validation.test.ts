@@ -233,6 +233,28 @@ describe("command validation", () => {
         expect(output.join("\n")).toContain("must be a positive integer");
     });
 
+    test("rejects comment duration without an anchor", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--file",
+            "file-id",
+            "--duration",
+            "1"
+        ]);
+
+        expect(output.join("\n")).toContain("Use --duration only with --anchor");
+        expect(process.exitCode).toBe(1);
+    });
+
     test("rejects comment create without file or project target", async () => {
         const output: string[] = [];
         const program = createProgram({
@@ -250,6 +272,70 @@ describe("command validation", () => {
         ]);
 
         expect(output.join("\n")).toContain("Provide either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects an empty comment", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--file",
+            "file-id"
+        ]);
+
+        expect(output.join("\n")).toContain("Provide --content, timeline options, or at least one --attachment");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects comment attachment upload without a target", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment-attachment",
+            "upload",
+            "--path",
+            "/tmp/review.pdf"
+        ]);
+
+        expect(output.join("\n")).toContain("Provide either --file or --project");
+        expect(process.exitCode).toBe(1);
+    });
+
+    test("rejects conflicting comment attachment upload targets", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment-attachment",
+            "upload",
+            "--file",
+            "file-id",
+            "--project",
+            "project-id",
+            "--path",
+            "/tmp/review.pdf"
+        ]);
+
+        expect(output.join("\n")).toContain("Use either --file or --project, not both");
         expect(process.exitCode).toBe(1);
     });
 

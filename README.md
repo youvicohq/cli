@@ -33,6 +33,10 @@ youvico project search --query="launch"
 youvico file upload.file --project=<project-id> --path=./file.mp4
 youvico comment list --file=<file-id>
 youvico comment list --project=<project-id>
+youvico comment-attachment upload --file=<file-id> --path=./review.pdf
+youvico comment-attachment upload --project=<project-id> --path=./brief.pdf
+youvico comment create --file=<file-id> --attachment=<attachment-id> --content="Review attached"
+youvico comment-attachment delete --id=<attachment-id>
 ```
 
 Command results are printed as JSON.
@@ -46,6 +50,7 @@ youvico project --help
 youvico file --help
 youvico folder --help
 youvico comment --help
+youvico comment-attachment --help
 youvico reaction --help
 youvico skill --help
 youvico skill-version --help
@@ -55,6 +60,7 @@ Use `--help` on any command for available options and examples:
 
 ```sh
 youvico file upload.file --help
+youvico comment-attachment upload --help
 ```
 
 ## Docs

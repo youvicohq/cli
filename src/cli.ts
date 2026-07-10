@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { Command, CommanderError } from "commander";
 
 import { registerAuthCommands } from "./commands/auth.js";
+import { registerCommentAttachmentCommands } from "./commands/comment-attachment.js";
 import { registerCommentCommands } from "./commands/comment.js";
 import { registerConfigCommands } from "./commands/config.js";
 import { registerFileCommands } from "./commands/file.js";
@@ -64,6 +65,7 @@ export function createProgram(deps: {
     registerFileCommands(program, stdout, stderr, getClient);
     registerFolderCommands(program, stdout, stderr, getClient);
     registerCommentCommands(program, stdout, stderr, getClient);
+    registerCommentAttachmentCommands(program, stdout, stderr, getClient);
     registerReactionCommands(program, stdout, stderr, getClient);
     registerSkillCommands(program, stdout, stderr, getClient);
     registerSkillVersionCommands(program, stdout, stderr, getClient);

@@ -133,6 +133,21 @@ describe("contextual help", () => {
         expect(help).not.toContain("reply [options]");
     });
 
+    test("shows comment attachment subcommand help", async () => {
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        program.exitOverride();
+
+        await program.parseAsync(["node", "youvico", "comment-attachment"]);
+
+        const help = output.join("\n");
+        expect(help).toContain("upload");
+        expect(help).toContain("delete");
+    });
+
     test("shows reaction subcommand help", async () => {
         const output: string[] = [];
         const program = createProgram({

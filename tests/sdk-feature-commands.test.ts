@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => {
+    const commentAttachmentsDelete = vi.fn();
+    const commentAttachmentsUploadForFile = vi.fn();
+    const commentAttachmentsUploadForProject = vi.fn();
     const commentsDelete = vi.fn();
     const commentsCreateForFile = vi.fn();
     const commentsCreateForProject = vi.fn();
@@ -13,6 +16,11 @@ const mocks = vi.hoisted(() => {
     const projectsScheduleDeletion = vi.fn();
     const projectsUpdate = vi.fn();
     const Client = vi.fn(() => ({
+        commentAttachments: {
+            delete: commentAttachmentsDelete,
+            uploadForFile: commentAttachmentsUploadForFile,
+            uploadForProject: commentAttachmentsUploadForProject
+        },
         comments: {
             createForFile: commentsCreateForFile,
             createForProject: commentsCreateForProject,
@@ -34,6 +42,9 @@ const mocks = vi.hoisted(() => {
 
     return {
         Client,
+        commentAttachmentsDelete,
+        commentAttachmentsUploadForFile,
+        commentAttachmentsUploadForProject,
         commentsDelete,
         commentsCreateForFile,
         commentsCreateForProject,
@@ -58,6 +69,9 @@ describe("SDK feature commands", () => {
     beforeEach(() => {
         process.env.YOUVICO_API_KEY = "xpi.live.djlasfnksaABCDEFG";
         mocks.Client.mockClear();
+        mocks.commentAttachmentsDelete.mockReset();
+        mocks.commentAttachmentsUploadForFile.mockReset();
+        mocks.commentAttachmentsUploadForProject.mockReset();
         mocks.commentsDelete.mockReset();
         mocks.commentsCreateForFile.mockReset();
         mocks.commentsCreateForProject.mockReset();
@@ -110,7 +124,8 @@ describe("SDK feature commands", () => {
             content: "Needs a trim",
             anchor: 1200,
             duration: 3,
-            parent: undefined
+            parent: undefined,
+            attachments: undefined
         });
         expect(output.join("\n")).toContain("comment-id");
     });
@@ -143,7 +158,8 @@ describe("SDK feature commands", () => {
             content: "Start here",
             anchor: 0,
             duration: 1,
-            parent: undefined
+            parent: undefined,
+            attachments: undefined
         });
         expect(output.join("\n")).toContain("comment-id");
     });
@@ -176,7 +192,8 @@ describe("SDK feature commands", () => {
             duration: undefined,
             parent: {
                 id: "parent-comment-id"
-            }
+            },
+            attachments: undefined
         });
         expect(output.join("\n")).toContain("reply-id");
     });
@@ -207,7 +224,71 @@ describe("SDK feature commands", () => {
             content: "Project note",
             parent: {
                 id: "parent-comment-id"
-            }
+            },
+            attachments: undefined
+        });
+        expect(output.join("\n")).toContain("comment-id");
+    });
+
+    test("file comment create accepts repeatable attachments without content", async () => {
+        mocks.commentsCreateForFile.mockResolvedValueOnce({ data: { id: "comment-id" } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--file",
+            "file-id",
+            "--attachment",
+            "CA12345678901234",
+            "--attachment",
+            "CA56789012345678"
+        ]);
+
+        expect(mocks.commentsCreateForFile).toHaveBeenCalledWith("file-id", {
+            content: undefined,
+            anchor: undefined,
+            duration: undefined,
+            parent: undefined,
+            attachments: [
+                { id: "CA12345678901234" },
+                { id: "CA56789012345678" }
+            ]
+        });
+        expect(output.join("\n")).toContain("comment-id");
+    });
+
+    test("project comment create accepts an attachment without content", async () => {
+        mocks.commentsCreateForProject.mockResolvedValueOnce({ data: { id: "comment-id" } });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment",
+            "create",
+            "--project",
+            "project-id",
+            "--attachment",
+            "CA12345678901234"
+        ]);
+
+        expect(mocks.commentsCreateForProject).toHaveBeenCalledWith("project-id", {
+            content: undefined,
+            parent: undefined,
+            attachments: [{ id: "CA12345678901234" }]
         });
         expect(output.join("\n")).toContain("comment-id");
     });
@@ -257,6 +338,79 @@ describe("SDK feature commands", () => {
             prev: "prev-cursor"
         });
         expect(output.join("\n")).toContain("\"data\": []");
+    });
+
+    test("comment attachment upload dispatches to file and project SDK endpoints", async () => {
+        mocks.commentAttachmentsUploadForFile.mockResolvedValueOnce({ id: "CA12345678901234" });
+        mocks.commentAttachmentsUploadForProject.mockResolvedValueOnce({ id: "CA56789012345678" });
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const fileProgram = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await fileProgram.parseAsync([
+            "node",
+            "youvico",
+            "comment-attachment",
+            "upload",
+            "--file",
+            "file-id",
+            "--path",
+            "/tmp/review.pdf"
+        ]);
+
+        const projectProgram = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+        await projectProgram.parseAsync([
+            "node",
+            "youvico",
+            "comment-attachment",
+            "upload",
+            "--project",
+            "project-id",
+            "--path",
+            "/tmp/source.pdf",
+            "--name",
+            "brief.pdf"
+        ]);
+
+        expect(mocks.commentAttachmentsUploadForFile).toHaveBeenCalledWith("file-id", {
+            name: "review.pdf",
+            path: "/tmp/review.pdf"
+        });
+        expect(mocks.commentAttachmentsUploadForProject).toHaveBeenCalledWith("project-id", {
+            name: "brief.pdf",
+            path: "/tmp/source.pdf"
+        });
+        expect(output.join("\n")).toContain("CA12345678901234");
+        expect(output.join("\n")).toContain("CA56789012345678");
+    });
+
+    test("comment attachment delete calls the SDK endpoint", async () => {
+        mocks.commentAttachmentsDelete.mockResolvedValueOnce(undefined);
+        const { createProgram } = await import("../src/cli.js");
+        const output: string[] = [];
+        const program = createProgram({
+            stdout: message => output.push(message),
+            stderr: message => output.push(message)
+        });
+
+        await program.parseAsync([
+            "node",
+            "youvico",
+            "comment-attachment",
+            "delete",
+            "--id",
+            "CA12345678901234",
+            "--yes"
+        ]);
+
+        expect(mocks.commentAttachmentsDelete).toHaveBeenCalledWith("CA12345678901234");
+        expect(output.join("\n")).toContain("Comment attachment deleted");
     });
 
     test("file update passes a folder assignment to the SDK", async () => {
