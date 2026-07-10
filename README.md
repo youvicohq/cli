@@ -51,7 +51,7 @@ youvico file --help
 youvico folder --help
 youvico comment --help
 youvico comment-attachment --help
-youvico reaction --help
+youvico comment-reaction --help
 youvico skill --help
 youvico skill-version --help
 ```

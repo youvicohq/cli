@@ -148,7 +148,7 @@ describe("contextual help", () => {
         expect(help).toContain("delete");
     });
 
-    test("shows reaction subcommand help", async () => {
+    test("shows comment reaction subcommand help", async () => {
         const output: string[] = [];
         const program = createProgram({
             stdout: message => output.push(message),
@@ -156,7 +156,7 @@ describe("contextual help", () => {
         });
         program.exitOverride();
 
-        await program.parseAsync(["node", "youvico", "reaction"]);
+        await program.parseAsync(["node", "youvico", "comment-reaction"]);
 
         const help = output.join("\n");
         expect(help).toContain("list");

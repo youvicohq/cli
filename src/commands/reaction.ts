@@ -12,7 +12,7 @@ export function registerReactionCommands(
     getClient: CommandContext["getClient"]
 ) {
     const reaction = program
-        .command("reaction")
+        .command("comment-reaction")
         .description("Work with reactions");
 
     const context = { program, stdout, stderr, getClient };
